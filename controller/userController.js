@@ -39,3 +39,11 @@ exports.user_detail_get = [
     }
   })
 ];
+
+exports.user_follow_post = [
+  authHelper.authenticateToken,
+  asyncHandler(async (req, res) => {
+    await User.updateOne({ _id: req.userId }, { $addToSet: { following: req.params.id } });
+    return res.json({ message: 'success' });
+  })
+];
