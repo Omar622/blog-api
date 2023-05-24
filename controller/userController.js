@@ -1,7 +1,6 @@
 const authHelper = require('../authHelper');
 const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
-const { body, validationResult } = require('express-validator');
 
 exports.user_list_get = asyncHandler(async (req, res) => {
   const users = await User.find({},
@@ -21,11 +20,11 @@ exports.user_detail_get = [
     if (currentUser.following.includes(req.params.id)) {
       const user = await User.findOne({ _id: req.params.id },
         'first_name last_name name date_of_birth date_of_creation blogs following')
-        .populate('following', '_id first_name last_name').populate('blogs', '_id').exec();
+        .populate('following', '_id first_name last_name').exec();
       return res.json({
         'name': user.name,
         'date_of_birth': user.date_of_birth,
-        'joined': user.date_of_birth,
+        'joined': user.date_of_creation,
         'blogs': user.blogs,
         'following': user.following
       });
@@ -35,7 +34,7 @@ exports.user_detail_get = [
       return res.json({
         'name': user.name,
         'date_of_birth': user.date_of_birth,
-        'joined': user.date_of_birth,
+        'joined': user.date_of_creation,
       });
     }
   })
