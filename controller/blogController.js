@@ -4,10 +4,6 @@ const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 
-exports.blog_list_get = [
-
-];
-
 exports.blog_create_post = [
   body('content')
     .trim()
@@ -31,4 +27,12 @@ exports.blog_create_post = [
   })
 ];
 
+exports.blog_list_get = [];
+
 exports.blog_detail_get = [];
+
+exports.comment_list_get = [];
+
+exports.comment_create_post = [];
+
+exports.comment_detail_get = [];
