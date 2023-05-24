@@ -1,6 +1,6 @@
 # blog-api
 
-This is Blog-Api created with node js (express).
+This is Blog-Api created with node js (express, mongoose).
 
 # overview
 * There are users can sign-up, log-in and log out.
