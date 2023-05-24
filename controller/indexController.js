@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const authHelper = require('../authHelper');
 const bcrypt = require('bcrypt');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
@@ -57,4 +58,36 @@ exports.sign_up_user_post = [
   })
 ];
 
-exports.log_in_user_post = [];
+exports.log_in_user_post = [
+  body('email')
+    .isEmail()
+    .escape()
+    .withMessage('must be email'),
+  body('password')
+    .escape(),
+  // then process request
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        errors: errors.array(),
+      });
+    } else {
+      const user = await User.findOne({ email: req.body.email }).exec();
+      if (!user)
+        return res.status(404).json({ message: 'email is not exist' });
+
+      bcrypt.compare(req.body.password, user.password, (err, result) => {
+        if (err)
+          return res.status(401).json({ message: 'Incorrect password' });
+        return result ?
+          res.json({
+            message: 'success',
+            token: authHelper.generateAccessToken(user._id.toString()),
+          }) :
+          res.status(401).json({ message: 'Incorrect password' });
+      });
+    }
+  })
+];

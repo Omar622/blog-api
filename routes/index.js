@@ -8,6 +8,6 @@ router.get('/', function (req, res) {
 
 router.post('/sign-up', indexController.sign_up_user_post);
 
-router.post('/login', indexController.log_in_user_post);
+router.post('/log-in', indexController.log_in_user_post);
 
 module.exports = router;
