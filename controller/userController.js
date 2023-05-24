@@ -3,9 +3,16 @@ const User = require('../models/user');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 
-exports.user_list_get = [
-
-];
+exports.user_list_get = asyncHandler(async (req, res) => {
+  const users = await User.find({},
+    'first_name last_name name date_of_birth date_of_creation').exec();
+  const usersInfo = users.map((user) => ({
+    'name': user.name,
+    'date_of_birth': user.date_of_birth,
+    'joined': user.date_of_creation,
+  }));
+  return res.json(usersInfo);
+});
 
 exports.user_detail_get = [
   authHelper.authenticateToken,
