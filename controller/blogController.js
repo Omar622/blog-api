@@ -1,6 +1,7 @@
 const authHelper = require('../authHelper');
 const Blog = require('../models/blog');
 const User = require('../models/user');
+const Comment = require('../models/comment');
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 
@@ -71,6 +72,39 @@ exports.blog_detail_get = [
 
 exports.comment_list_get = [];
 
-exports.comment_create_post = [];
+exports.comment_create_post = [
+  body('content')
+    .trim()
+    .isLength({ min: 1 })
+    .escape()
+    .withMessage('content must be specified.'),
+  authHelper.authenticateToken,
+  asyncHandler(async (req, res) => {
+    const blog = await Blog.findOne({ _id: req.params.id });
+    const newComment = new Comment({
+      content: req.body.content,
+      author: req.userId,
+      blog: blog._id,
+    });
+    if (blog.author.toString() === req.userId) {
+      await Promise.all([
+        newComment.save(),
+        Blog.updateOne({ _id: req.params.id }, { $push: { comments: newComment._id } })
+      ]);
+      return res.json({ message: 'success' });
+    } else {
+      const user = await User.findOne({ _id: req.userId }, 'following').exec();
+      if (user.following.includes(blog.author)) {
+        await Promise.all([
+          newComment.save(),
+          Blog.updateOne({ _id: req.params.id }, { $push: { comments: newComment._id } })
+        ]);
+        return res.json({ message: 'success' });
+      } else {
+        return res.status(401).json({ message: "couldn't access" });
+      }
+    }
+  })
+];
 
 exports.comment_detail_get = [];
