@@ -70,7 +70,24 @@ exports.blog_detail_get = [
   })
 ];
 
-exports.comment_list_get = [];
+exports.comment_list_get = [
+  authHelper.authenticateToken,
+  asyncHandler(async (req, res) => {
+    const blog = await Blog.findOne({ _id: req.params.id }, 'author comments')
+      .populate('comments', 'content date_of_creation');
+
+    if (blog.author.toString() === req.userId) {
+      return res.json({ comments: blog.comments });
+    } else {
+      const user = await User.findOne({ _id: req.userId }, 'following').exec();
+      if (user.following.includes(blog.author)) {
+        return res.json({ comments: blog.comments });
+      } else {
+        return res.status(401).json({ message: "couldn't access" });
+      }
+    }
+  })
+];
 
 exports.comment_create_post = [
   body('content')
@@ -107,4 +124,27 @@ exports.comment_create_post = [
   })
 ];
 
-exports.comment_detail_get = [];
+exports.comment_detail_get = [
+  authHelper.authenticateToken,
+  asyncHandler(async (req, res) => {
+    let blog, comment;
+    [blog, comment] = await Promise.all([
+      Blog.findOne({ _id: req.params.blogId }),
+      comment = await Comment.findOne({ _id: req.params.commentId }),
+    ]);
+
+    if (!blog.comments.includes(req.params.commentId))
+      return res.status(400).json({ message: "invalid input" });
+
+    if (blog.author.toString() === req.userId) {
+      return res.json({ comment });
+    } else {
+      const user = await User.findOne({ _id: req.userId }, 'following').exec();
+      if (user.following.includes(blog.author)) {
+        return res.json({ comment });
+      } else {
+        return res.status(401).json({ message: "couldn't access" });
+      }
+    }
+  })
+];

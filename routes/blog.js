@@ -12,6 +12,6 @@ router.get('/:id/comment', blogController.comment_list_get);
 
 router.post('/:id/comment/create', blogController.comment_create_post);
 
-router.get('/:id/comment/:id', blogController.comment_detail_get);
+router.get('/:blogId/comment/:commentId', blogController.comment_detail_get);
 
 module.exports = router;
